@@ -1,0 +1,1 @@
+This folder is under heavy changes at the moment. It is not guaranteed to work. It has not been tested. DO NOT PULL from it UNTIL I SAY OTHERWISE!!! More documentation will follow soon. In the mean time, some documentation is available in the commit messages for each file. Sorry. So much still to do. Full API Documentation will be available eventually.
