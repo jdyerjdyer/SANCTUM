@@ -6,6 +6,14 @@ CREATE TABLE discordbot.userLog (
     actionData varchar(255)
 );
 
+CREATE TABLE discordbot.hostileLog {
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    hostileID bigint,
+    actionTime TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    actionType varchar(16),
+    actionData varchar(255)
+}
+
 CREATE TABLE discordbot.users (
     id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     discordUserID bigint,
@@ -19,7 +27,8 @@ CREATE TABLE discordbot.users (
     maxStamina int NOT NULL DEFAULT 5,
     xp int NOT NULL DEFAULT 0,
     lvl int NOT NULL DEFAULT 0,
-    statPoints int NOT NULL DEFAULT 0
+    statPoints int NOT NULL DEFAULT 0,
+    lastCheckInTime TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE discordbot.factions (
@@ -40,8 +49,7 @@ CREATE TABLE discordbot.hostiles (
     strength int NOT NULL DEFAULT 10,
     speed int NOT NULL DEFAULT 10,
     stash int NOT NULL DEFAULT 10,
-    alive bool NOT NULL DEFAULT 0,
-    fled bool NOT NULL DEFAULT 0,
+    status varchar(1000) NOT NULL DEFAULT '{ "alive": 0, "fled": 0, "removed": 0 }',
     claimID varchar(4)
 );
 
@@ -51,6 +59,15 @@ CREATE TABLE discordbot.attackLog (
     discordUserID bigint,
     hostileID varchar(16),
     damage int NOT NULL DEFAULT 0
+);
+
+CREATE TABLE discordbot.hostileAttackLog (
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    timeAttacked TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    discordUserID bigint,
+    hostileID varchar(16),
+    criticalHit bool NOT NULL DEFAULT 0,
+    hitAmount int NOT NULL DEFAULT 0
 );
 
 
