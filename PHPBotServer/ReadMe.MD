@@ -1,14 +1,14 @@
-#***NOTICE***
+<h1>***NOTICE***</h1>
 
 This folder is under heavy changes at the moment. It is not guaranteed to work. It has not been tested. DO NOT PULL from it UNTIL I SAY OTHERWISE!!!
 More documentation will follow soon. In the mean time, some documentation is available in the commit messages for each file. Sorry. So much still to do.
-Full API Documentation will be available eventually. Below is the documentation for the current state of the Users, Hostiles, and Factions Modules. More changes to come!```
+Full API Documentation will be available eventually. Below is the documentation for the current state of the Users, Hostiles, and Factions Modules. More changes to come!
 
-#***NOTICE***
+<h1>***NOTICE***</h1>
 
-#***Users Module*** Filename: (/inc/modules/users.php)
+<h1>***Users Module*** Filename: (/inc/modules/users.php)</h1>
 
-##Functions List
+<h2>Functions List</h2>
 
 ```	/*	
 		Input:
@@ -370,9 +370,9 @@ Full API Documentation will be available eventually. Below is the documentation 
 	function logUserAtack($userID, $hostileID, $damage)
 ```
 
-#***Hostiles Module*** Filename: (/inc/modules/hostiles.php)
+<h1>***Hostiles Module*** Filename: (/inc/modules/hostiles.php)</h1>
 
-##Functions List
+<h2>Functions List</h2>
 
 ```	/*
 		Input:
@@ -681,9 +681,9 @@ Full API Documentation will be available eventually. Below is the documentation 
 	function logHostileAtack($userID, $hostileID, $criticalHit, $hitAmount)```
 ```
 
-#***Factions Module*** Filename: (/inc/modules/factions.php)
+<h1>***Factions Module*** Filename: (/inc/modules/factions.php)</h1>
 
-##Functions List
+<h2>Functions List</h2>
 
 ```	/*
 		Input:
@@ -768,4 +768,4 @@ Full API Documentation will be available eventually. Below is the documentation 
 	function addFactionAccount($roleID, $amount)
 ```
 
-More Documentation Coming Soon!
+<h2>***More Documentation Coming Soon!***</h2>
