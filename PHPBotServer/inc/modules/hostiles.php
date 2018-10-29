@@ -96,7 +96,7 @@
 
 	/*	Pulls the current status JSON from the DB for hostile $hostileID and replaces any $statusParts found and adds any not found. Returns true on success, otherwise false.
 		$statusParts is an associative array with the keys being status names. If an invalid status name is found, then no change is made and the function returns false.
-		If false adds error to $error object.
+		If false adds error to $error object. Also, status values forced to be integer through floor function and must be greater than or equal to zero.
 	*/
 	function setHostileStatusParts($hostileID, $statusParts) {
 		if (is_array($statusParts) && count($statusParts) {
@@ -146,7 +146,7 @@
 		$hostile = getHostileByID($hostileID);
 		if ($user && $hostile) {
 			$criticalHit = 0;
-			$hitAmount = getEnemyDamage($hostile["speed"],$user["speed"],$hostile["strength"]);
+			$hitAmount = getHostileDamage($hostile["speed"],$user["speed"],$hostile["strength"]);
 			if($hitAmount > 0){
 				if ($hitAmount >= $user["health"]) {
 					$hitAmount = $user["health"];
