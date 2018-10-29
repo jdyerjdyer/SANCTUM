@@ -1,12 +1,16 @@
 #***NOTICE***
+
 This folder is under heavy changes at the moment. It is not guaranteed to work. It has not been tested. DO NOT PULL from it UNTIL I SAY OTHERWISE!!!
 More documentation will follow soon. In the mean time, some documentation is available in the commit messages for each file. Sorry. So much still to do.
-Full API Documentation will be available eventually. Below is the documentation for the current state of the Users, Hostiles, and Factions Modules. More changes to come!
+Full API Documentation will be available eventually. Below is the documentation for the current state of the Users, Hostiles, and Factions Modules. More changes to come!```
+
 #***NOTICE***
 
 #***Users Module*** Filename: (/inc/modules/users.php)
+
 ##Functions List
-	/*	
+
+```	/*	
 		Input:
 			$userID		A string representing the Discord ID for the User.
 	 	Returns:
@@ -25,7 +29,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function getUserByDiscordID($userID)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -52,7 +57,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 		Notes:
 			None
 	function createUser($userID)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -83,7 +89,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function subUserWallet($userID, $amount)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -113,7 +120,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function addUserWallet($userID, $amount)
-
+```
+```
 	/*
 		Input:
 			$stat		A stat name to be checked against an array of valid stat names. (Eventually will be from a database table.)
@@ -131,7 +139,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function isValidUserStat($stat)
-
+```
+```
 	/*
 		Input:
 			$stat		A stat name to retrieve the current stat cap from a switch statement. (Eventually will be from a database table.)
@@ -149,7 +158,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function getUserStatCap($stat)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -186,7 +196,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function subUserStat($userID, $stat, $amount)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -225,8 +236,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function addUserStat($userID, $stat, $amount)
-
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -249,7 +260,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Previously checked userLog table for actionType with value "checkin". Updated to check field added to users table.
 	*/
 	function getUserCheckIn($userID)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -311,8 +323,9 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Code was used in both attack and hostileAttackBack. Now separated out to just handle the user attacking portion of that functionality.
 			Also added aliases, separated, and combined attack commands that use this function.
 	*/
-	function performUserAttack($userID, $hostileID, $damage) {
-
+	function performUserAttack($userID, $hostileID, $damage)
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -333,7 +346,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Should add at least a check to see if the insert worked and if not report logging error.
 	*/
 	function logUserAction($userID, $actionType, $actionData)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -354,10 +368,13 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Should add at least a check to see if the insert worked and if not report logging error.
 	*/
 	function logUserAtack($userID, $hostileID, $damage)
+```
 
 #***Hostiles Module*** Filename: (/inc/modules/hostiles.php)
+
 ##Functions List
-	/*
+
+```	/*
 		Input:
 			$hostileID	The hostile's ID as an integer
 		Returns:
@@ -377,7 +394,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			This function decodes the JSON status field for you as an associative array stored back in the same result field.
 	*/
 	function getHostileByID($hostileID)
-
+```
+```
 	/*
 		Input:
 			$stat		A stat name to be checked against an array of valid stat names. (Eventually will be from a database table.)
@@ -395,7 +413,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function isValidHostileStat($stat)
-
+```
+```
 	/*
 		Input:
 			$stat		A stat name to retrieve the current stat cap from a switch statement. (Eventually will be from a database table.)
@@ -413,7 +432,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function getHostileStatCap($stat)
-
+```
+```
 	/*
 		Input:
 			$status		A status name to be checked against an array of valid status names. (Eventually will be from a database table.)
@@ -431,7 +451,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function isValidHostileStatus($status)
-
+```
+```
 	/*
 		Input:
 			$hostileID	The hostile's ID as an integer
@@ -468,7 +489,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function subHostileStat($hostileID, $stat, $amount)
-
+```
+```
 	/*
 		Input:
 			$hostileID	The hostile's ID as an integer
@@ -506,7 +528,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 		Notes:
 			None	*/
 	function addHostileStat($hostileID, $stat, $amount)
-
+```
+```
 	/*
 		Input:
 			$hostileID	The hostile's ID as an integer
@@ -544,7 +567,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Currently there is no function to remove status parts. That function needs added later.
 	*/
 	function setHostileStatusParts($hostileID, $statusParts)
-
+```
+```
 	/*
 		Input:
 			$userID			A string representing the Discord ID for the User.
@@ -588,7 +612,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 		Notes:
 	*/
 	function performHostileAttack($userID, $hostileID, $userCausedDamage)
-
+```
+```
 	/*
 		Input:
 			$hostileSpeed		The hostile's speed.
@@ -609,8 +634,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Should probably check that the data passed in is numeric and proper.
 	*/
 	function getHostileDamage($hostileSpeed,$userSpeed,$hostileStrength)
-
-
+```
+```
 	/*
 		Input:
 			$hostileID	The hostile's ID as an integer
@@ -631,7 +656,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			Should add at least a check to see if the insert worked and if not report logging error.
 	*/
 	function logHostileAction($hostileID, $actionType, $actionData)
-
+```
+```
 	/*
 		Input:
 			$userID		A string representing the Discord ID for the User.
@@ -652,12 +678,14 @@ Full API Documentation will be available eventually. Below is the documentation 
 		Notes:
 			Should add at least a check to see if the insert worked and if not report logging error.
 	*/
-	function logHostileAtack($userID, $hostileID, $criticalHit, $hitAmount)
+	function logHostileAtack($userID, $hostileID, $criticalHit, $hitAmount)```
+```
 
 #***Factions Module*** Filename: (/inc/modules/factions.php)
+
 ##Functions List
 
-	/*
+```	/*
 		Input:
 			$roleID		The string representation of the Discord Role ID assigned to the faction leader.
 		Returns:
@@ -675,7 +703,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 		Notes:
 	*/
 	function getFactionByDiscordRoleID($roleID)
-
+```
+```
 	/*
 		Input:
 			$roleID		The string representation of the Discord Role ID assigned to the faction leader.
@@ -706,7 +735,8 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function subFactionAccount($roleID, $amount)
-
+```
+```
 	/*
 		Input:
 			$roleID		The string representation of the Discord Role ID assigned to the faction leader.
@@ -736,5 +766,6 @@ Full API Documentation will be available eventually. Below is the documentation 
 			None
 	*/
 	function addFactionAccount($roleID, $amount)
+```
 
 More Documentation Coming Soon!
