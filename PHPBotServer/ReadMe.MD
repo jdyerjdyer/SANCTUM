@@ -6,7 +6,7 @@ Full API Documentation will be available eventually. Below is the documentation 
 
 <h1>***NOTICE***</h1>
 
-<h1>***Users Module*** Filename: (/inc/modules/users.php)</h1>
+<h1>Users Module *** Filename: (/inc/modules/users.php)</h1>
 
 <h2>Functions List</h2>
 
@@ -370,7 +370,7 @@ Full API Documentation will be available eventually. Below is the documentation 
 	function logUserAtack($userID, $hostileID, $damage)
 ```
 
-<h1>***Hostiles Module*** Filename: (/inc/modules/hostiles.php)</h1>
+<h1>Hostiles Module *** Filename: (/inc/modules/hostiles.php)</h1>
 
 <h2>Functions List</h2>
 
@@ -681,7 +681,7 @@ Full API Documentation will be available eventually. Below is the documentation 
 	function logHostileAtack($userID, $hostileID, $criticalHit, $hitAmount)```
 ```
 
-<h1>***Factions Module*** Filename: (/inc/modules/factions.php)</h1>
+<h1>Factions Module *** Filename: (/inc/modules/factions.php)</h1>
 
 <h2>Functions List</h2>
 
@@ -768,4 +768,4 @@ Full API Documentation will be available eventually. Below is the documentation 
 	function addFactionAccount($roleID, $amount)
 ```
 
-<h2>***More Documentation Coming Soon!***</h2>
+<h2>More Documentation Coming Soon!</h2>
