@@ -13,6 +13,7 @@
 	{
 		case "senddata.php":
 		case "senddata2.php":
+		case "sendpostdata.php":
 			switch ($dataType) {
 				/*
 					Possible Errors:
@@ -293,19 +294,37 @@
 
 				break;
 
+				/*
+					Possible Errors:
+						JSONError
+						invalidStatusName
+						invalidStatusValue
+						invalidStatusParts
+						hostileAlreadyDead
+						invalidHostile
+						Note -> Doesn't appear to be used currently. Old functionality just got the most recently created ravager by searching the database. New code requires an id passed in $dataToSend.
+				*/
 				case "hostileFlee":
-						$q = "SELECT id FROM hostiles WHERE alive = 1 ORDER BY id DESC LIMIT 1;";
-						$r2 = mysqli_query($con,$q);
-						if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-								while ( $a = mysqli_fetch_assoc($r2) ) {
-										$hostileID=stripslashes($a['id']);
-								}
-								$q = "UPDATE hostiles SET fled = 1,alive=0 WHERE id = '$hostileID' LIMIT 1";
-								$r2 = mysqli_query($con,$q);
-								echo "fled";
-						} else{
-								echo "alreadyDead";
+					$success = false;
+					if ($hostile = getHostileByID($dataToSend)) {
+						if ($hostile["status"]["alive"] == 1) {
+							$statusParts = array("fled" => 1, "alive" => 0);
+							if (setHostileStatusParts($dataToSend, $statusParts)) {
+								$success = true;
+							}
+						} else {
+							$error->addError("hostileAlreadyDead", "Hostile $dataToSend passed to hostileFlee request is already dead.");
 						}
+					} else {
+						$error->addError("invalidHostile", "Invalid hostile $id passed into hostileFlee request.");
+					}
+
+					if ($success) {
+						$result .= "fled";
+					} else {
+						$result .= "alreadyDead";
+					}
+
 				break;
 
 				case "newHostile":
@@ -315,11 +334,7 @@
 								echo "notCreated";
 						} else{
 									$elvl = $dataToSend;
-									if ($filename == "senddata.php") {
-										$healthBase = 50; $strengthBase = 3; $speedBase = 3; $stashBase = 3;
-									} else {
-										$healthBase = 150; $strengthBase = 6; $speedBase = 6; $stashBase = 9;
-									}
+									$healthBase = 50; $strengthBase = 3; $speedBase = 3; $stashBase = 3;
 									$healthMin = ($healthBase * $elvl) / 2; $healthMax = $healthBase * $elvl;
 									$strengthMin = ($strengthBase * $elvl) / 2; $strengthMax = $strengthBase * $elvl;
 									$speedMin = ($speedBase * $elvl) / 2; $speedMax = $speedBase * $elvl;
@@ -337,9 +352,6 @@
 									echo $health.",".$speed.",".$strength.",".$claimID;
 						}
 				break;
-
-
-
 
 				case "claim":
 							$claimAmount = $dataToSend2;
@@ -459,7 +471,6 @@
 							exit;
 				break;
 
-
 				case "lvlinfo":
 						$q = "SELECT xp,lvl FROM users WHERE discordUserID = '$userID';";
 						$r2 = mysqli_query($con,$q);
@@ -469,15 +480,16 @@
 									$currentlvl=stripslashes($a['lvl']);
 									$lvlbase=getLevelBase();
 									$lvl=getLevel($xp,$lvlbase);
+									$level = $dataToSend2;
+									$str = generateStatFromLevel($level,"str");
+									$spd = generateStatFromLevel($level,"spd");
+									$hp = generateStatFromLevel($level,"hp");
+									$stash = generateStatFromLevel($level,"stash");
 
 							}
 						}
-						if ($filename == "senddata.php") {
-							//echo "LEVEL: ".getLevel($xp,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl);
-							echo "LEVEL: ".getLevel($dataToSend,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl);
-						} else {
-							echo "LEVEL: ".getLevel($xp,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl);
-						}
+						//echo "LEVEL: ".getLevel($xp,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl);
+						echo "LEVEL: ".getLevel($dataToSend,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl)."<BR><BR>STR: ".$str." SPD: ".$spd." HP: ".$hp." STASH:: ".$stash;
 				break;
 
 				case "upgradeStats":
@@ -622,57 +634,34 @@
 
 
 				case "getLevelUp":
-						//addXp($userID,$dataToSend);
-					if ($filename == "senddata.php") {
-						$levelCap = 30;$levelCapXP = 625;
-						$q = "SELECT xp,lvl,statPoints,chests FROM users WHERE discordUserID = '$userID';";
-						$r2 = mysqli_query($con,$q);
-						if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-									while ( $a = mysqli_fetch_assoc($r2) ) {
-											$xp=stripslashes($a['xp']);
-											$lvl=stripslashes($a['lvl']);
-											$statPoints=stripslashes($a['statPoints']);
-											$chests=stripslashes($a['chests']);
-									}
-									$lvlbase = getLevelBase();
-									$currentLVL = floor(getLevel($xp,$lvlbase));
-									if($currentLVL > $lvl){
-											if($currentLVL > $levelCap){
-													$chests += 1;
-													$q = "UPDATE users SET lvl = $levelCap,chests = chests + 1,xp = $levelCapXP WHERE discordUserID = '$userID' LIMIT 1";
-													$r2 = mysqli_query($con,$q);
-											}else{
-													$statPoints += 1;
-													$q = "UPDATE users SET lvl = lvl + 1,statPoints = statPoints + 1 WHERE discordUserID = '$userID' LIMIT 1";
-													$r2 = mysqli_query($con,$q);
-													$lvl = $lvl + 1;
-											}
-											echo "levelup,".$lvl.",".$statPoints.",".$statPoints;
-									} else{
-											echo "xpadded,".$currentLVL.",".$statPoints;
-									}
-						}
-					} else {
-						$q = "SELECT xp,lvl,statPoints FROM users WHERE discordUserID = '$userID';";
-						$r2 = mysqli_query($con,$q);
-						if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-									while ( $a = mysqli_fetch_assoc($r2) ) {
-											$xp=stripslashes($a['xp']);
-											$lvl=stripslashes($a['lvl']);
-											$statPoints=stripslashes($a['statPoints']);
-									}
-									$lvlbase = getLevelBase();
-									$currentLVL = floor(getLevel($xp,$lvlbase));
-									if($currentLVL > $lvl){
-											$statPoints += 1;
-											$q = "UPDATE users SET lvl = lvl + 1,statPoints = statPoints + 1 WHERE discordUserID = '$userID' LIMIT 1";
-											$r2 = mysqli_query($con,$q);
-											$lvl = $lvl + 1;
-											echo "levelup,".$lvl.",".$statPoints;
-									} else{
-											echo "xpadded,".$currentLVL.",".$statPoints;
-									}
-						}
+					//addXp($userID,$dataToSend);
+					$levelCap = 30;$levelCapXP = 625;
+					$q = "SELECT xp,lvl,statPoints,chests FROM users WHERE discordUserID = '$userID';";
+					$r2 = mysqli_query($con,$q);
+					if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
+								while ( $a = mysqli_fetch_assoc($r2) ) {
+										$xp=stripslashes($a['xp']);
+										$lvl=stripslashes($a['lvl']);
+										$statPoints=stripslashes($a['statPoints']);
+										$chests=stripslashes($a['chests']);
+								}
+								$lvlbase = getLevelBase();
+								$currentLVL = floor(getLevel($xp,$lvlbase));
+								if($currentLVL > $lvl){
+										if($currentLVL > $levelCap){
+												$chests += 1;
+												$q = "UPDATE users SET lvl = $levelCap,chests = chests + 1,xp = $levelCapXP WHERE discordUserID = '$userID' LIMIT 1";
+												$r2 = mysqli_query($con,$q);
+										}else{
+												$statPoints += 1;
+												$q = "UPDATE users SET lvl = lvl + 1,statPoints = statPoints + 1 WHERE discordUserID = '$userID' LIMIT 1";
+												$r2 = mysqli_query($con,$q);
+												$lvl = $lvl + 1;
+										}
+										echo "levelup,".$lvl.",".$statPoints.",".$statPoints;
+								} else{
+										echo "xpadded,".$currentLVL.",".$statPoints;
+								}
 					}
 				break;
 
@@ -797,15 +786,6 @@
 						$r2 = mysqli_query($con,$q);
 				break;
 
-
-			}
-			break;
-		case "sendpostdata.php":
-			switch ($dataType) {
-
-						//gets all dammage from users
-
-
 				case "sendAllAttacks":
 						$message = "";
 						$playerIDs = explode("|", $dataToSend);
@@ -897,221 +877,13 @@
 				break;
 
 
-				case "lvlinfo":
-						$q = "SELECT xp,lvl FROM users WHERE discordUserID = '$userID';";
-						$r2 = mysqli_query($con,$q);
-						if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-							while ( $a = mysqli_fetch_assoc($r2) ) {
-									$xp=stripslashes($a['xp']);
-									$currentlvl=stripslashes($a['lvl']);
-									$lvlbase=getLevelBase();
-									$lvl=getLevel($xp,$lvlbase);
-									$level = $dataToSend2;
-									$str = generateStatFromLevel($level,"str");
-									$spd = generateStatFromLevel($level,"spd");
-									$hp = generateStatFromLevel($level,"hp");
-									$stash = generateStatFromLevel($level,"stash");
-
-							}
-						}
-						//echo "LEVEL: ".getLevel($xp,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl);
-						echo "LEVEL: ".getLevel($dataToSend,$lvlbase),"<BR>XP: ".$xp."<BR>CURRENT LEVEL PROGRESS:".getCurrentLevelProgress($xp,$lvl)."<BR><BR>STR: ".$str." SPD: ".$spd." HP: ".$hp." STASH:: ".$stash;
-				break;
-
-				case "attack":
-
-							$q = "UPDATE hostiles SET health = health - $dataToSend WHERE id = '$dataToSend2' LIMIT 1";
-							$r2 = mysqli_query($con,$q);
-							$q = "UPDATE users SET stamina = stamina - 1 WHERE discordUserID = '$userID' LIMIT 1";
-							$r2 = mysqli_query($con,$q);
-
-							//$q = "INSERT INTO userLog (discordUserID, actionType, actionData)
-							//VALUES (" . $userID . ", '" . $dataType . "', '$userID attacked Ravager#$dataToSend2.');";
-							//$r2 = mysqli_query($con,$q);
-
-							$q = "INSERT INTO attackLog (discordUserID, hostileID, damage)
-							VALUES ('$userID','$dataToSend2','$dataToSend');";
-							$r2 = mysqli_query($con,$q);
-
-							$q = "SELECT hostiles.health,hostiles.maxHealth,hostiles.speed,hostiles.strength,users.speed as userspeed,users.health as userhealth FROM hostiles,users WHERE hostiles.id = '$dataToSend2' AND users.discordUserID = '$userID';";
-							$r2 = mysqli_query($con,$q);
-							if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-								while ( $a = mysqli_fetch_assoc($r2) ) {
-										$hostileHealth=stripslashes($a['health']);
-										$hostileMaxHealth=stripslashes($a['maxHealth']);
-										$hostileSpeed=stripslashes($a['speed']);
-										$hostileStrength=stripslashes($a['strength']);
-										$userSpeed=stripslashes($a['userspeed']);
-										$userHealth=stripslashes($a['userhealth']);
-								}
-								if($hostileHealth <= 0){
-										if($hostileHealth < 0){ $hostileHealth = 0;};
-										//returns health less than zero, kill enemy.
-										$q = "UPDATE hostiles SET alive = 0,health = 0 WHERE id = '$dataToSend2' LIMIT 1";
-										$r2 = mysqli_query($con,$q);
-								}
-								$criticalHit = 0;
-								$hitAmount = getEnemyDamage($hostileSpeed,$userSpeed,$hostileStrength);
-								if($hitAmount > 0){
-										if ($hitAmount >= $userHealth){$hitAmount = $userHealth; $criticalHit = 1;};
-										$q = "UPDATE users SET health = health - $hitAmount WHERE discordUserID = '$userID' LIMIT 1";
-										$r2 = mysqli_query($con,$q);
-								}
-								echo $hostileHealth.",".$hostileMaxHealth.",".$hitAmount.",".$criticalHit;
-								exit;
-							} else{
-								echo "0";
-							}
-
-
-							exit;
-
-
-				break;
-
-				case "hostileAttackBack":
-
-							$q = "UPDATE users SET stamina = stamina - 1 WHERE discordUserID = '$userID' AND stamina > 0 LIMIT 1";
-							$r2 = mysqli_query($con,$q);
-
-
-							$q = "SELECT hostiles.health,hostiles.maxHealth,hostiles.speed,hostiles.strength,users.speed as userspeed,users.health as userhealth FROM hostiles,users WHERE hostiles.id = '$dataToSend2' AND users.discordUserID = '$userID';";
-							$r2 = mysqli_query($con,$q);
-							if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-								while ( $a = mysqli_fetch_assoc($r2) ) {
-										$hostileHealth=stripslashes($a['health']);
-										$hostileMaxHealth=stripslashes($a['maxHealth']);
-										$hostileSpeed=stripslashes($a['speed']);
-										$hostileStrength=stripslashes($a['strength']);
-										$userSpeed=stripslashes($a['userspeed']);
-										$userHealth=stripslashes($a['userhealth']);
-								}
-								$criticalHit = 0;
-								$hitAmount = getEnemyDamage($hostileSpeed,$userSpeed,$hostileStrength);
-								if($hitAmount > 0){
-										if ($hitAmount >= $userHealth){$hitAmount = $userHealth; $criticalHit = 1;};
-										$q = "UPDATE users SET health = health - $hitAmount WHERE discordUserID = '$userID' LIMIT 1";
-										$r2 = mysqli_query($con,$q);
-								}
-								echo $hostileHealth.",".$hostileMaxHealth.",".$hitAmount.",".$criticalHit;
-								exit;
-							} else{
-								echo "0";
-							}
-
-
-							exit;
-
-
-				break;
-
-				case "hostileFlee":
-						$q = "SELECT id FROM hostiles WHERE alive = 1 ORDER BY id DESC LIMIT 1;";
-						$r2 = mysqli_query($con,$q);
-						if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-								while ( $a = mysqli_fetch_assoc($r2) ) {
-										$hostileID=stripslashes($a['id']);
-								}
-								$q = "UPDATE hostiles SET fled = 1,alive=0 WHERE id = '$hostileID' LIMIT 1";
-								$r2 = mysqli_query($con,$q);
-								echo "fled";
-						} else{
-								echo "alreadyDead";
-						}
-				break;
-
-				case "newHostile":
-						$q = "SELECT id FROM hostiles WHERE alive = 1 LIMIT 1;";
-						$r2 = mysqli_query($con,$q);
-						if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-								echo "notCreated";
-						} else{
-									$elvl = $dataToSend;
-									$healthBase = 50; $strengthBase = 3; $speedBase = 3; $stashBase = 3;
-									$healthMin = ($healthBase * $elvl) / 2; $healthMax = $healthBase * $elvl;
-									$strengthMin = ($strengthBase * $elvl) / 2; $strengthMax = $strengthBase * $elvl;
-									$speedMin = ($speedBase * $elvl) / 2; $speedMax = $speedBase * $elvl;
-									$stashMin = ($stashBase * $elvl) / 2; $stashMax = $stashBase * $elvl;
-
-									$health = floor(rand($healthMin,$healthMax));
-									$strength = floor(rand($strengthMin,$strengthMax));
-									$speed = floor(rand($speedMin,$speedMax));
-									$stash = floor(rand($stashMin,$stashMax));
-
-									$claimID = floor(rand(1000,9999));
-									$q = "INSERT INTO hostiles (hostileType, maxHealth, health, strength, speed, stash, alive, claimID)
-																			VALUES ('ravager', '$health', '$health', '$strength', '$speed', '$stash', 1, '$claimID');";
-									$r2 = mysqli_query($con,$q);
-									echo $health.",".$speed.",".$strength.",".$claimID;
-						}
-				break;
-
-
-
-
-				case "getHostileData":
-							$q = "SELECT stash,claimID FROM hostiles WHERE alive = 0 AND id = '$dataToSend' LIMIT 1;";
-							$r2 = mysqli_query($con,$q);
-							if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-								while ( $a = mysqli_fetch_assoc($r2) ) {
-										$stash=stripslashes($a['stash']);
-										$claimID=stripslashes($a['claimID']);
-								}
-								echo $stash.",".$claimID;
-							}
-							exit;
-
-				break;
-
-
-
-				case "getDamageDistribution":
-						//Gets base stats for enemy
-						$q = "SELECT stash,maxHealth,fled FROM hostiles WHERE id = '$dataToSend' LIMIT 1;";
-						$r2 = mysqli_query($con,$q);
-						$a = mysqli_fetch_assoc($r2);
-						$stash=stripslashes($a['stash']);
-						$maxHealth=stripslashes($a['maxHealth']);
-						$fled=stripslashes($a['fled']);
-						$totalCrystalsInStash = 0;
-
-						if($fled == 1){
-									echo "fled";
-						}else{
-									//gets all dammage from users
-									$damageDistribution = array();
-									$q = "SELECT discordUserID,SUM(damage) totalDamage FROM attackLog WHERE hostileID = $dataToSend GROUP BY discordUserID;";
-									//$q = "SELECT attackLog.damage,attackLog.discordUserID,hostiles.stash,hostiles.maxHealth FROM attackLog WHERE hostiles.id = attackLog.hostileID AND attackLog.hostileID = '$dataToSend';";
-									$r2 = mysqli_query($con,$q);
-									if ( $r2 !== false && mysqli_num_rows($r2) > 0 ) {
-										while ( $a = mysqli_fetch_assoc($r2) ) {
-												$damage=stripslashes($a['totalDamage']);
-												$discordUserID=stripslashes($a['discordUserID']);
-												$damagePercent = round(( $damage / $maxHealth ) * 100);
-												$percentStashAmount = round($stash * ($damagePercent/100));
-												$totalCrystalsInStash += $percentStashAmount;
-												// you can add single array values too
-												$damageDistribution[] = array('id'=>$discordUserID, 'totalDamage'=>$damage, 'damagePercent'=>$damagePercent, 'crystalsReceived'=>$percentStashAmount);
-												if($dataToSend2 == 1){
-													//Flag to actually distribute crystals
-													$q2 = "UPDATE users SET wallet = wallet + $percentStashAmount WHERE discordUserID = '$discordUserID' LIMIT 1";
-													$r3 = mysqli_query($con,$q2);
-												}
-
-										}
-										echo json_encode($damageDistribution);
-									} else{
-										echo 0;
-									}
-									exit;
-						}
-
-				break;
 
 			}
 			break;
+
 		case "getdata.php":
 			switch ($dataType) {
+				case "isConversionLocked"://Added per Ratstail91
 				case "hasConvertedToday":
 						$q = "SELECT id FROM userLog WHERE actionTime >= (DATE_SUB(now(), INTERVAL 30 DAY)) AND actionType = 'conversion' AND discordUserID = '$userID';";
 						$r2 = mysqli_query($con,$q);
@@ -1352,6 +1124,28 @@ function generateStatFromLevel($level,$stat){
 
 		return $value;
 }
+
 /* END FROM sendPostData.php */
+
+/* SUGGESTED REPLACEMENT FOR generateStatFromLevel */
+function generateStatFromLevel($level,$stat){
+        $value = 0;
+        switch (strtolower($stat) {
+            case "str":
+            case "spd":
+                    $value = roundlog10($level)*21+16);
+                    $value = round($value + (rand(-$value/10,$value/10)));
+                    if($level < 15){$value = round($value * 0.9);};
+        }elseif(strtolower($stat) === "hp"){
+                    $value = floor(50 + (30 * $level) + pow($level, 1.5));
+        }elseif(strtolower($stat) === "stash"){
+                    $value = round(log10($level)*6+2.5 );
+                    $value = rand(pow($value, 2.2),pow($value, 2.3));
+                    if($level < 15){$value = round($value * 0.7);};
+        }
+
+        return $value;
+}
+/* END SUGGESTED REPLACEMENT */
 
 ?>
