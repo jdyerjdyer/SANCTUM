@@ -1,8 +1,8 @@
 <?PHP
 
 	/* Returns hostile information as an associative array if found, otherwise false. Note -- This function decodes the JSON status field for you as an associative array stored back in the same result field. */
-	function getHostileByID($id) {
-		$q = "SELECT * FROM hostiles WHERE id = '$id' LIMIT 1";
+	function getHostileByID($hostileID) {
+		$q = "SELECT * FROM hostiles WHERE id = '$hostileID' LIMIT 1";
 		if ($r2 = mysqli_query($con, $q)) {
 			$r2->fetch_assoc();//Found hostile so retrieve it as an associative array.
 			$r2["status"] = json_decode($r2["status"], true);//Decode the JSON status field and return it as an associative array.
@@ -40,22 +40,22 @@
 	}
 
 	/* Subtracts an amount from a hostile's stat provided that $stat is a valid stat and $amount is greater than zero. If stat is less than $amount, sets to zero and logs action. Returns true on success, false otherwise. If false, adds error to $error object. */
-	function subHostileStat($id, $stat, $amount) {
+	function subHostileStat($hostileID, $stat, $amount) {
 		$amount = floor($amount);//Integer Only
 		if ($amount > 0) {
 			if (isValidHostileStat($stat)) {
-				if ($hostile = getHostileByID($id)) {
+				if ($hostile = getHostileByID($hostileID)) {
 					if ($hostile[$stat] >= $amount) {
-						$q = "UPDATE hostiles SET $stat = " . $hostile[$stat] . " - $amount WHERE id = '$id' LIMIT 1";
+						$q = "UPDATE hostiles SET $stat = " . $hostile[$stat] . " - $amount WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
 						return true;
 					} else {
-						$q = "UPDATE hostiles SET $stat = 0 WHERE discordUserID = '$userID' LIMIT 1";
+						$q = "UPDATE hostiles SET $stat = 0 WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
-						$r2 = logHostileAction($id, "AmountGreaterThanStat", "Hostile $id only has " . $hostile[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
+						$r2 = logHostileAction($hostileID, "AmountGreaterThanStat", "Hostile $hostileID only has " . $hostile[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
 					}
 				} else {
-					$error->addError("invalidHostile", "Invalid hostile $id passed into subHostileStat.");
+					$error->addError("invalidHostile", "Invalid hostile $hostileID passed into subHostileStat.");
 				}
 			} else {
 				$error->addError("invalidStat", "Stat $stat passed to subHostileStat is not a valid stat.");
@@ -67,23 +67,23 @@
 	}
 
 	/* Adds an amount to a hostile's stat provided that $stat is a valid stat and $amount is greater than zero. If amount plus current stat is greater than stat cap, then sets to stat cap and logs action. Returns true on success, false otherwise. If false, adds error to $error object. */
-	function addHostileStat($id, $stat, $amount) {
+	function addHostileStat($hostileID, $stat, $amount) {
 		$amount = floor($amount);//Integer Only
 		if ($amount > 0) {
 			if (isValidHostileStat($stat)) {
-				if ($hostile = getHostileByID($id)) {
+				if ($hostile = getHostileByID($hostileID)) {
 					$statCap = getHostileStatCap($stat);
 					if ($hostile[$stat] + $amount > $statCap) {
-						$q = "UPDATE hostiles SET $stat = $statCap + $amount WHERE id = '$id' LIMIT 1";
+						$q = "UPDATE hostiles SET $stat = $statCap + $amount WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
-						$r2 = logHostileAction($id, "StatPlusAmountGreaterThanStatCap", "Adding $amount to hostile $id stat $stat currently at " . $hostile[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
+						$r2 = logHostileAction($hostileID, "StatPlusAmountGreaterThanStatCap", "Adding $amount to hostile $hostileID stat $stat currently at " . $hostile[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
 					} else {
-						$q = "UPDATE hostiles SET $stat = " . $hostile[$stat] . " + $amount WHERE id = '$id' LIMIT 1";
+						$q = "UPDATE hostiles SET $stat = " . $hostile[$stat] . " + $amount WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
 					}
 					return true;
 				} else {
-					$error->addError("invalidHostile", "Invalid hostile $id passed into addHostileStat.");
+					$error->addError("invalidHostile", "Invalid hostile $hostileID passed into addHostileStat.");
 				}
 			} else {
 				$error->addError("invalidStat", "Stat $stat passed to addHostileStat is not a valid stat.");
@@ -94,19 +94,13 @@
 		return false;
 	}
 
-	/* Updates a hostile's status JSON field. Returns true on success, otherwise false. If false adds error to $error object. */
-	function setHostileStatus($hostileID, $statusJSON) {
-		$q = "UPDATE hostiles SET status = '$statusJSON' WHERE id = '$hostileID' LIMIT 1";
-		return mysqli_query($con,$q);
-	}
-
 	/*	Pulls the current status JSON from the DB for hostile $hostileID and replaces any $statusParts found and adds any not found. Returns true on success, otherwise false.
 		$statusParts is an associative array with the keys being status names. If an invalid status name is found, then no change is made and the function returns false.
 		If false adds error to $error object.
 	*/
 	function setHostileStatusParts($hostileID, $statusParts) {
 		if (is_array($statusParts) && count($statusParts) {
-			$q = "SELECT status FROM hostiles WHERE id = '$id' LIMIT 1";
+			$q = "SELECT status FROM hostiles WHERE id = '$hostileID' LIMIT 1";
 			if ($r2 = mysqli_query($con, $q)) {
 				$status = json_decode($r2["status"], true);//Decode the JSON status field and return it as an associative array.
 
@@ -126,12 +120,13 @@
 				}
 
 				if ($statusJSON = json_encode($status, JSON_NUMERIC_CHECK)) {
-					return setHostileStatus($hostileID, $statusJSON);//Perform the actual status update in the database and return the result.
+					$q = "UPDATE hostiles SET status = '$statusJSON' WHERE id = '$hostileID' LIMIT 1";
+					return mysqli_query($con,$q);//Perform the actual status update in the database and return the result.
 				} else {
 					$error->addError("JSONError", "The function json_encode encountered an error trying to encode the status array. JSON Error: " . json_last_error_msg());
 				}
 			} else {
-				$error->addError("invalidHostile", "Invalid hostile $id passed into setHostileStatusPart.");
+				$error->addError("invalidHostile", "Invalid hostile $hostileID passed into setHostileStatusPart.");
 			}
 		} else {
 			$error->addError("invalidStatusParts", "Invalid argument statusParts passed into setHostileStatusPart. statusParts must be a non-empty associative array of status names and value pairs.");
