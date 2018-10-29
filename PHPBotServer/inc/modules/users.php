@@ -10,7 +10,7 @@
 
 	/* Creates a new user with Discord User ID $userID unless that user already exists. Returns true on success, false on error. If false, adds error to $error object. */
 	function createUser($userID) {
-		if (!getUserFromDiscordID($userID)) {
+		if (!getUserByDiscordID($userID)) {
 			$q = "INSERT INTO users (discordUserID,wallet) VALUES ('$userID', 0);";
 			$r2 = mysqli_query($con,$q);
 			return true;
@@ -163,17 +163,16 @@
 		Logs the attack in attackLog table.
 	*/
 	function performUserAttack($userID, $hostileID, $damage) {
-		$user = getUserFromDiscordID($userID);
+		$user = getUserByDiscordID($userID);
 		$hostile = getHostileByID($hostileID);
 		if ($user && $hostile) {
-			subHostileStat($dataToSend2, "health", $dataToSend);//Deal Hostile Damage From User.
+			subHostileStat($hostileID, "health", $damage);//Deal Hostile Damage From User.
 			subUserStat($userID, "stamina", 1);//Decrease User Stamina by 1.
 
-			//$r2 = logUserAction($userID, $dataType, "$userID attacked Ravager#$dataToSend2.");//Debug Log attack action -> now logs attack in attackLog. Probably safe to remove at any time.
-			logUserAttack($userID, $dataToSend2, $dataToSend);//Log User Attacking Hostile
+			logUserAttack($userID, $hostileID, $damage);//Log User Attacking Hostile
 
 			if ($hostile["health"] - $damage <= 0) {//Did we kill it?
-				setHostileStatusPart($hostileID, array("alive"=>0));//Mark it as no longer alive.
+				setHostileStatusParts($hostileID, array("alive"=>0));//Mark it as no longer alive.
 			}
 
 			return true;
