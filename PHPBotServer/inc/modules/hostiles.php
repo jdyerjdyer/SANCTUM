@@ -39,10 +39,6 @@
 		return in_array($status, ["alive","fled", "removed"]);
 	}
 
-	/* Returns the status code $status from $statusJSON if $status is a valid status code. If successful, returns code, if not, returns false and logs error. NOTE -- USE equivilance operator as status code value could equate to false (0 for instance). */
-	function getStatusFromStatusJSON($status, $statusJSON) {
-	}
-
 	/* Subtracts an amount from a hostile's stat provided that $stat is a valid stat and $amount is greater than zero. If stat is less than $amount, sets to zero and logs action. Returns true on success, false otherwise. If false, adds error to $error object. */
 	function subHostileStat($id, $stat, $amount) {
 		$amount = floor($amount);//Integer Only
@@ -151,7 +147,7 @@
 		Returns an array containing the keys "criticalHit" and "hitAmount" if successful, otherwise false. If false, logs error to $error object.
 	*/
 	function performHostileAttack($userID, $hostileID, $userCausedDamage) {
-		$user = getUserFromDiscordID($userID);
+		$user = getUserByDiscordID($userID);
 		$hostile = getHostileByID($hostileID);
 		if ($user && $hostile) {
 			$criticalHit = 0;
