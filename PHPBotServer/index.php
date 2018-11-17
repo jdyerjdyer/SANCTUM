@@ -1096,7 +1096,11 @@
 	$jsonArray = array("status"=>$status, "result"=>$result);//Set up the output JSON array.
 
 	if ($status != "success") {//If we had errors, we need to add them to the output JSON array.
-		array_push($jsonArray, json_encode($error->getAllErrors, 0, 1));//No Flags, One Level
+		array_push($jsonArray, json_encode($error->getAllErrors(), 0, 1));//No Flags, One Level
+	}
+
+	if ($warning->hasWarnings()) {//If we had warnings, we need to add them to the output JSON array.
+		array_push($jsonArray, json_encode($warning->getAllWarnings(), 0, 1));//No Flags, One Level
 	}
 
 	//Output the JSON encoded data.
