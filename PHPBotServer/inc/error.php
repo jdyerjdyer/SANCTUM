@@ -19,5 +19,9 @@
 		function getAllErrors() {
 			return $errors;
 		}
+
+		function hasErrors() {
+			return (count($errors) != 0);
+		}
 	}
 ?>

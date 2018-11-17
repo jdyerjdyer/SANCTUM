@@ -33,8 +33,9 @@
 		include_once 'modules\factions.php';
 		include_once 'modules\hostiles.php';
 
-	/* Include Error Handler. */
+	/* Include Error and Warning Handler. */
 	include_once "error.php";
+	include_once "warning.php";
 
 	/* Check URL and POST data and set up defaults. */
 		/* Send Data Parameters */
