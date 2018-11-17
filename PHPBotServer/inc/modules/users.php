@@ -101,7 +101,8 @@
 					} else {
 						$q = "UPDATE users SET $stat = 0 WHERE discordUserID = '$userID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
-						$r2 = logUserAction($userID, "AmountGreaterThanStat", "User $userID only has " . $user[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
+						$r2 = logUserAction($userID, "amountGreaterThanStat", "User $userID only has " . $user[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
+						$warning->addWarning("amountGreaterThanStat", "User $userID only has " . $user[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
 					}
 					return true;
 				} else {
@@ -126,7 +127,8 @@
 					if ($user[$stat] + $amount > $statCap) {
 						$q = "UPDATE users SET $stat = $statCap + $amount WHERE discordUserID = '$userID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
-						$r2 = logUserAction($userID, "StatPlusAmountGreaterThanStatCap", "Adding $amount to user $userID stat $stat currently at " . $user[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
+						$r2 = logUserAction($userID, "statPlusAmountGreaterThanStatCap", "Adding $amount to user $userID stat $stat currently at " . $user[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
+						$warning->addWarning("statPlusAmountGreaterThanStatCap", "Adding $amount to user $userID stat $stat currently at " . $user[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
 					} else {
 						$q = "UPDATE users SET $stat = " . $user[$stat] . " + $amount WHERE discordUserID = '$userID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);

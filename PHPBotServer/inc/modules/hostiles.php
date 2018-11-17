@@ -52,7 +52,8 @@
 					} else {
 						$q = "UPDATE hostiles SET $stat = 0 WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
-						$r2 = logHostileAction($hostileID, "AmountGreaterThanStat", "Hostile $hostileID only has " . $hostile[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
+						$r2 = logHostileAction($hostileID, "amountGreaterThanStat", "Hostile $hostileID only has " . $hostile[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
+						$warning->addWarning("amountGreaterThanStat", "Hostile $hostileID only has " . $hostile[$stat] . " $stat so unable to remove $amount. Stat set to zero instead.");
 					}
 				} else {
 					$error->addError("invalidHostile", "Invalid hostile $hostileID passed into subHostileStat.");
@@ -76,7 +77,8 @@
 					if ($hostile[$stat] + $amount > $statCap) {
 						$q = "UPDATE hostiles SET $stat = $statCap + $amount WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
-						$r2 = logHostileAction($hostileID, "StatPlusAmountGreaterThanStatCap", "Adding $amount to hostile $hostileID stat $stat currently at " . $hostile[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
+						$r2 = logHostileAction($hostileID, "statPlusAmountGreaterThanStatCap", "Adding $amount to hostile $hostileID stat $stat currently at " . $hostile[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
+						$warning->addWarning("statPlusAmountGreaterThanStatCap", "Adding $amount to hostile $hostileID stat $stat currently at " . $hostile[$stat] . " would exceed $statCap so unable to add $amount. Stat set to $statCap instead.");
 					} else {
 						$q = "UPDATE hostiles SET $stat = " . $hostile[$stat] . " + $amount WHERE id = '$hostileID' LIMIT 1";
 						$r2 = mysqli_query($con,$q);
